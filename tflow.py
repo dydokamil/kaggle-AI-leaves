@@ -2,17 +2,6 @@
 
 '''
 This is a tensorflow/keras model to classify leaves based on images and some additional data
-Solution:
--    1. Load all images
--    2. Load labels
--    3. Load all additional features + create a dict of 'id': additional features
--    4. Create a dict of 'id': species
--    5. Create a dict 'label': onehot_encoding
--    6. Crop all images to the first occurence of a white pixel
--    7. Randomly crop all images using a square "filter"
-    8. Randomly distort all images - scale, shear, rotate, flip, shift
-    9. Create a dict of images and their labels (w/ distorted images) 'id': [images]
-   10. Create a model
 '''
 
 import tensorflow as tf
@@ -66,9 +55,10 @@ all_images = [crop_to_first(np.asarray(img)) for img in all_images]  # convert t
 # 1st dim = a leaf; 2nd dim = one of LEAF_CROPS crops of the leaf; 3rd, 4th dim = image
 all_images_randomly_cropped = [y for x in all_images for y in [batch_random_crop(x, LEAF_CROPS)]]
 
-# 8. Randomly distort images
+# TODO: Randomly distort images
 
 
+# TODO: Create a dict of images and their labels (w/ distorted images) 'id': [images]
 
 
 # TODO: uncomment it
@@ -76,6 +66,8 @@ all_images_randomly_cropped = [y for x in all_images for y in [batch_random_crop
 # min_max_scaler = preprocessing.MinMaxScaler()
 # X_train_minmax = [min_max_scaler.fit_transform(x) for x in all_images]
 # ####################
+
+# TODO: create a model
 
 
 # img = Image.open(path_images + '/1573.jpg')
