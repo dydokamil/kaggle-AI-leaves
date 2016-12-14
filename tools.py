@@ -1,10 +1,9 @@
 # coding=utf-8
-import numpy as np
-import tensorflow as tf
 import os
 
+import numpy as np
 from PIL import Image
-from keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
+from keras.preprocessing.image import ImageDataGenerator, img_to_array
 
 
 def crop_to_first(image):
@@ -15,7 +14,7 @@ def crop_to_first(image):
     '''
     image = image[~np.all(image == 0, axis=1)]  # rows
     image = image[:, ~np.all(image == 0, axis=0)]  # cols
-    return image
+    return np.asarray(image)
 
 
 def add_frame(image):
@@ -39,7 +38,7 @@ def add_frame(image):
     return image
 
 
-def distorted_input(img, count):
+def __distort_input(img, count=1):
     '''
     Distorts images
     :param img: Image to distort
@@ -48,11 +47,12 @@ def distorted_input(img, count):
     '''
     assert count > 0
     datagen = ImageDataGenerator(
-        rotation_range=180,
+        rotation_range=40,
         width_shift_range=0.2,
         height_shift_range=0.2,
-        shear_range=0.9,
+        shear_range=0.2,
         horizontal_flip=True,
+        vertical_flip=True,
         fill_mode='constant')
 
     x = img_to_array(img)
@@ -80,21 +80,33 @@ def __random_crop(image):
 
     if image.shape[0] < image.shape[1]:  # more columns
         random_start = np.random.randint(0, image.shape[1] - size)
-        return image[:, random_start:random_start + size]
+        return np.asarray(image[:, random_start:random_start + size])
 
     elif image.shape[0] > image.shape[1]:  # more rows
         random_start = np.random.randint(0, image.shape[0] - size)
-        return image[random_start:random_start + size, :]
+        return np.asarray(image[random_start:random_start + size, :])
 
 
-def batch_random_crop(image, batch_size):
+def __batch_random_crop(image, batch_size):
     '''
     Returns a batch of square crops from /image/
     :param image: numpy array image
     :param batch_size: how many images to return
     :return: array of square images
     '''
-    return [y for x in range(batch_size) for y in [__random_crop(image)]]
+    return np.asarray([y for x in range(batch_size) for y in [__random_crop(image)]])
+
+
+def batch_random_crop_and_distort(image, count):
+    '''
+    Randomly selects a part of the image and distorts it
+    :param image: image to distort
+    :param count: how many images to return
+    :return: batch of distorted images
+    '''
+
+    distorted_array = __distort_input(image, count)
+    return np.asarray([__random_crop(distorted) for distorted in distorted_array])
 
 
 def load_images(directory):
@@ -105,8 +117,8 @@ def load_images(directory):
     '''
     files = os.listdir(directory)
     path_files = [directory + file for file in files]
-    return [Image.open(image) for image in path_files]
+    return np.asarray([np.asarray(Image.open(image)) for image in path_files])
 
 
 def my_normalize(img, min=0., max=255.):
-    return np.asarray([[(x-min) / (max-min) for x in x] for x in img])
+    return np.asarray([[(x - min) / (max - min) for x in x] for x in img])

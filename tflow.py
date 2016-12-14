@@ -15,7 +15,7 @@ from sklearn import preprocessing
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-from Deep_Learning.kaggle.leaves.tools import crop_to_first, add_frame, distorted_input, load_images, batch_random_crop
+from Deep_Learning.kaggle.leaves.tools import crop_to_first, load_images, batch_random_crop_and_distort
 
 # settings
 LEAF_CROPS = 5
@@ -26,7 +26,7 @@ train_path = path + 'train.csv'
 test_path = path + 'test.csv'
 
 # Load all images
-all_images = load_images(path_images)
+all_images = load_images(path_images)[:20]
 
 # Load all labels
 train = pd.read_csv(train_path)
@@ -48,14 +48,16 @@ onehot_labels = oh_encoder.fit_transform([[x] for x in labels_int])
 onehot_labels = onehot_labels.toarray()  # array of one-hot encodings for each label
 
 # Crop all images to the first occurence of a white pixel
-all_images = [crop_to_first(np.asarray(img)) for img in all_images]  # convert to array + crop
+all_images = np.asarray([crop_to_first(img) for img in all_images])  # convert to array + crop
 
 # Randomly crop all images using a square "filter"
 # 1st dim = a leaf; 2nd dim = one of LEAF_CROPS crops of the leaf; 3rd, 4th dim = image
-all_images_randomly_cropped = [y for x in all_images for y in [batch_random_crop(x, LEAF_CROPS)]]
+# all_images_randomly_cropped = [y for x in all_images for y in [batch_random_crop(x, LEAF_CROPS)]]
 
 # TODO: Randomly distort images
-distorted_images = np.asarray([[distorted_input(x, 1) for x in x] for x in all_images_randomly_cropped])
+# all_images_distorted = [[batch_random_crop_and_distort(x, 1) for x in x] for x in all_images]
+# all_images_distorted = [batch_random_crop_and_distort(x, 5) for x in all_images]
+# pass
 
 # TODO: Resize all images
 
@@ -68,6 +70,8 @@ distorted_images = np.asarray([[distorted_input(x, 1) for x in x] for x in all_i
 # ####################
 
 # TODO: create a model
+
+# TODO: use batch_random_crop_and_distort to generate batches of distorted images
 
 
 # img = Image.open(path_images + '/1573.jpg')
