@@ -18,7 +18,7 @@ from sklearn.preprocessing import OneHotEncoder
 from Deep_Learning.kaggle.leaves.tools import crop_to_first, load_images, batch_random_crop_and_distort
 
 # settings
-LEAF_CROPS = 5
+BATCH_SIZE = 128
 
 path = '/home/kamil/Documents/kaggle/leaves/'
 path_images = '/home/kamil/Documents/kaggle/leaves/images/'
@@ -50,18 +50,8 @@ onehot_labels = onehot_labels.toarray()  # array of one-hot encodings for each l
 # Crop all images to the first occurence of a white pixel
 all_images = np.asarray([crop_to_first(img) for img in all_images])  # convert to array + crop
 
-# Randomly crop all images using a square "filter"
-# 1st dim = a leaf; 2nd dim = one of LEAF_CROPS crops of the leaf; 3rd, 4th dim = image
-# all_images_randomly_cropped = [y for x in all_images for y in [batch_random_crop(x, LEAF_CROPS)]]
-
-# TODO: Randomly distort images
-# all_images_distorted = [[batch_random_crop_and_distort(x, 1) for x in x] for x in all_images]
-# all_images_distorted = [batch_random_crop_and_distort(x, 5) for x in all_images]
-# pass
-
-# TODO: Resize all images
-
-# TODO: Create a dict of images and their labels (w/ distorted images) 'id': [images]
+# TODO: Create a dict of labels and their images: {'id': [image]}
+all_images = {id: img for id, img in zip(list(train_ids_species.keys()), all_images)}
 
 # TODO: uncomment it
 # Normalize all images
@@ -69,24 +59,11 @@ all_images = np.asarray([crop_to_first(img) for img in all_images])  # convert t
 # X_train_minmax = [min_max_scaler.fit_transform(x) for x in all_images]
 # ####################
 
+# TODO: Resize all images
+
 # TODO: create a model
 
 # TODO: use batch_random_crop_and_distort to generate batches of distorted images
 
-
-# img = Image.open(path_images + '/1573.jpg')
-# img_arr = np.asarray(img)
-# cropped = crop_to_first(img_arr)
-# Image.fromarray(cropped).show()
-
-# framed = add_frame(cropped)
-# img_framed = Image.fromarray(framed)
-
 # img_framed.thumbnail((224, 224), Image.ANTIALIAS)
 # img_framed.show()
-
-# distorted = distorted_input(path_images + '/1583.jpg', 5)
-# Image.fromarray(np.reshape(distorted[0], [234, 1295])).show()
-
-# randomly_cropped = random_crop(img_arr)
-# Image.fromarray(randomly_cropped).show()
