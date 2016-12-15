@@ -1,5 +1,6 @@
 # coding=utf-8
 import os
+import random
 
 import numpy as np
 from PIL import Image
@@ -97,6 +98,11 @@ def __batch_random_crop(image, batch_size):
     return np.asarray([y for x in range(batch_size) for y in [__random_crop(image)]])
 
 
+def random_crop_and_distort(image):
+    distorted = __distort_input(image)
+    return __random_crop(distorted)
+
+
 def batch_random_crop_and_distort(image, count):
     '''
     Randomly selects a part of the image and distorts it
@@ -109,16 +115,40 @@ def batch_random_crop_and_distort(image, count):
     return np.asarray([__random_crop(distorted) for distorted in distorted_array])
 
 
-def load_images(directory):
+def resize_image(img, shape):
+    return np.asarray(Image.fromarray(img).resize(shape))
+
+
+def add_dim(img):
+    return np.asarray(np.reshape(img, img.shape + (1,)))
+
+
+def load_images(directory, ids):
     '''
     Load all images from a specified directory
     :param directory: directory to load images from
     :return: array of images
     '''
+    ids = ids.tolist()
     files = os.listdir(directory)
     path_files = [directory + file for file in files]
+    path_files = [path for path in path_files if int(path.split('/')[-1].split('.')[0]) in ids]
     return np.asarray([np.asarray(Image.open(image)) for image in path_files])
 
 
-def my_normalize(img, min=0., max=255.):
-    return np.asarray([[(x - min) / (max - min) for x in x] for x in img])
+def random_batch_distorted(images, labels, batch_size, shape):
+    '''
+    This function takes the entire list of images & labels and returns a random batch of [images] and [labels] of /size/
+    for training
+    :param images: 3D list: the entire list of images
+    :param labels: 2D list: the entire list of labels
+    :param size: how many samples to return
+    :return: 4D list [images]: [batch_size, x, y, 1], 2D list [labels]: [sample number, label]
+    '''
+    assert len(images) >= batch_size
+
+    choices = random.sample(range(len(images)), batch_size)
+    samples_distorted = [resize_image(random_crop_and_distort(image), shape) for image in np.asarray(images)[choices]]
+
+    return np.asarray(samples_distorted), labels[choices]
+
