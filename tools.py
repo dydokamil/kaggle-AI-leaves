@@ -5,6 +5,7 @@ import random
 import numpy as np
 from PIL import Image
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
+import tensorflow as tf
 
 
 def crop_to_first(image):
@@ -148,7 +149,17 @@ def random_batch_distorted(images, labels, batch_size, shape):
     assert len(images) >= batch_size
 
     choices = random.sample(range(len(images)), batch_size)
-    samples_distorted = [resize_image(random_crop_and_distort(image), shape) for image in np.asarray(images)[choices]]
+    samples_distorted = [add_dim(resize_image(random_crop_and_distort(image), shape)) for image in
+                         np.asarray(images)[choices]]
 
     return np.asarray(samples_distorted), labels[choices]
 
+
+def weight_variable(shape):
+    initial = tf.truncated_normal(shape, stddev=0.1)
+    return tf.Variable(initial)
+
+
+def bias_variable(shape):
+    initial = tf.constant(0.1, shape=shape)
+    return tf.Variable(initial)
