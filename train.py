@@ -3,22 +3,15 @@
 
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-import tflearn
+from keras.layers import Dense, Convolution2D, MaxPooling2D, BatchNormalization, Dropout, Flatten
+from keras.models import Sequential
 from sklearn import preprocessing
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from tflearn import conv_2d
-from tflearn import dropout
-from tflearn import fully_connected
-from tflearn import input_data
-from tflearn import local_response_normalization
-from tflearn import max_pool_2d
-from tflearn import regression
 
-from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_distorted
+from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_generator
 
-BATCH_SIZE = 990
+BATCH_SIZE = 100
 N_CLASSES = 99
 IMAGE_RESOLUTION = (227, 227)
 
@@ -59,33 +52,28 @@ all_images = [min_max_scaler.fit_transform(x) for x in all_images]
 # Create a dict of labels and their images: {'id': [image]}
 all_images = {iden: img for iden, img in zip(list(train_ids_species.keys()), all_images)}
 
-# Create a model
-network = input_data(shape=[None, IMAGE_RESOLUTION[0], IMAGE_RESOLUTION[1], 1])
-network = conv_2d(network, 96, 11, strides=4, activation='relu')
-network = max_pool_2d(network, 3, strides=2)
-network = local_response_normalization(network)
-network = conv_2d(network, 256, 5, activation='relu')
-network = max_pool_2d(network, 3, strides=2)
-network = local_response_normalization(network)
-network = conv_2d(network, 384, 3, activation='relu')
-network = conv_2d(network, 384, 3, activation='relu')
-network = conv_2d(network, 256, 3, activation='relu')
-network = max_pool_2d(network, 3, strides=2)
-network = local_response_normalization(network)
-network = fully_connected(network, 4096, activation='tanh')
-network = dropout(network, .5)
-network = fully_connected(network, 4096, activation='tanh')
-network = dropout(network, .5)
-network = fully_connected(network, N_CLASSES, activation='softmax')
-network = regression(network, optimizer='momentum', loss='categorical_crossentropy', learning_rate=.001)
+# Create a model (keras)
+model = Sequential()
+model.add(Convolution2D(96, 11, 11, subsample=(4, 4), activation='relu',
+                        input_shape=(IMAGE_RESOLUTION) + (1,)))
+model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+model.add(BatchNormalization())
+model.add(Convolution2D(256, 5, 5, activation='relu'))
+model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+model.add(BatchNormalization())
+model.add(Convolution2D(384, 3, 3, activation='relu'))
+model.add(Convolution2D(384, 3, 3, activation='relu'))
+model.add(Convolution2D(256, 3, 3, activation='relu'))
+model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+model.add(BatchNormalization())
+# flatten? #
+model.add(Flatten())
+model.add(Dense(4096, activation='tanh'))
+model.add(Dropout(.5))
+model.add(Dense(4096, activation='tanh'))
+model.add(Dropout(.5))
+model.add(Dense(N_CLASSES, activation='softmax'))
 
-col = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-for x in col:
-    tf.add_to_collection(tf.GraphKeys.VARIABLES, x)
-
-model = tflearn.DNN(network, checkpoint_path='model_alexnet', max_checkpoints=1, tensorboard_verbose=2)
-
-# for i in range(20000):
-batch = random_batch_distorted(list(all_images.values()), onehot_labels, BATCH_SIZE, IMAGE_RESOLUTION)
-model.fit(batch[0], batch[1], n_epoch=1000, validation_set=.1, shuffle=True, show_metric=True,
-          batch_size=BATCH_SIZE, snapshot_step=200, snapshot_epoch=False, run_id='alexnet')
+model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
+model.fit_generator(random_batch_generator(list(all_images.values()), onehot_labels, IMAGE_RESOLUTION),
+                    samples_per_epoch=BATCH_SIZE, nb_epoch=50)
