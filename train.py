@@ -28,7 +28,7 @@ train = pd.read_csv(train_path)
 labels = train['species'].tolist()
 
 # Load all training images
-all_images = load_images(path_images, ids=train.id)[:64]  # TODO: remove [:64]
+all_images = load_images(path_images, ids=train.id)[:64]
 
 # Create a dict of 'id': additional features
 additional = train.drop('species', 1).set_index('id').T.to_dict('list')
@@ -72,14 +72,20 @@ model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(4096, activation='tanh'))
 model.add(Dropout(.5))
-model.add(Dense(4096, activation='tanh'))
-model.add(Dropout(.5))
-model.add(Dense(N_CLASSES, activation='softmax'))
 
-model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='sgd')
+additional_info_model = Sequential()
+additional_info_model.add(Dense(192, input_shape=(192,)))
+
+model_final = Sequential()
+model_final.add(Merge([model, additional_info_model], mode='concat'))
+model_final.add(Dense(4096 + ADDITIONAL_FEATURES_LEN, activation='tanh'))
+model_final.add(Dropout(.5))
+model_final.add(Dense(N_CLASSES, activation='softmax'))
+model_final.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='sgd')
 
 for e in range(NB_EPOCH):
     X, y = random_batch_distorted(list(all_images.values()), onehot_labels, BATCH_SIZE, IMAGE_RESOLUTION,
                                   distorted=True)
     X = np.array(X)
-    loss = model.fit(X, y, batch_size=BATCH_SIZE, nb_epoch=40)
+    additional_X = np.array(list(additional.values())[:64])  # TODO: remove [:64]
+    loss = model_final.fit([X, additional_X], y, batch_size=BATCH_SIZE, nb_epoch=40)
