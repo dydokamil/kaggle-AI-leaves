@@ -9,9 +9,10 @@ from sklearn import preprocessing
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_generator
+from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_distorted
 
-BATCH_SIZE = 100
+BATCH_SIZE = 64
+NB_EPOCH = 20000
 N_CLASSES = 99
 IMAGE_RESOLUTION = (227, 227)
 
@@ -55,7 +56,7 @@ all_images = {iden: img for iden, img in zip(list(train_ids_species.keys()), all
 # Create a model (keras)
 model = Sequential()
 model.add(Convolution2D(96, 11, 11, subsample=(4, 4), activation='relu',
-                        input_shape=(IMAGE_RESOLUTION) + (1,)))
+                        input_shape=(IMAGE_RESOLUTION[0], IMAGE_RESOLUTION[1]) + (1,)))
 model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
 model.add(BatchNormalization())
 model.add(Convolution2D(256, 5, 5, activation='relu'))
@@ -66,7 +67,6 @@ model.add(Convolution2D(384, 3, 3, activation='relu'))
 model.add(Convolution2D(256, 3, 3, activation='relu'))
 model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
 model.add(BatchNormalization())
-# flatten? #
 model.add(Flatten())
 model.add(Dense(4096, activation='tanh'))
 model.add(Dropout(.5))
@@ -75,5 +75,10 @@ model.add(Dropout(.5))
 model.add(Dense(N_CLASSES, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
-model.fit_generator(random_batch_generator(list(all_images.values()), onehot_labels, IMAGE_RESOLUTION),
-                    samples_per_epoch=BATCH_SIZE, nb_epoch=50)
+
+for e in range(NB_EPOCH):
+    print('Epoch', e)
+    X, y = random_batch_distorted(list(all_images.values()), onehot_labels, BATCH_SIZE, IMAGE_RESOLUTION)
+    X = np.array(X)
+    loss = model.train_on_batch([X], y)
+    print('loss: ', loss)

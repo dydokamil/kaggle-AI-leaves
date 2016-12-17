@@ -136,29 +136,19 @@ def load_images(directory, ids):
     return np.asarray([np.asarray(Image.open(image)) for image in path_files])
 
 
-def random_batch_generator(images, labels, shape, distort=True):
+def random_batch_distorted(images, labels, batch_size, shape):
     '''
-    This generator takes the entire list of images & labels and yields a random image of /shape/ and its label
+    This function takes the entire list of images & labels and returns a random batch of [images] and [labels] of /size/
     for training
-    :param images: 3D list [images, x, y]: the entire list of images
-    :param labels: 2D list [samples, one_hot_labels]: the entire list of one-hot labels
-    :param shape: shape of the image to return
-    :param distort: distort the image?
-    :return: 3D list [images]: [x, y, 1], 1D list [labels]: [label]
+    :param images: 3D list: the entire list of images
+    :param labels: 2D list: the entire list of labels
+    :param size: how many samples to return
+    :return: 4D list [images]: [batch_size, x, y, 1], 2D list [labels]: [sample number, label]
     '''
+    assert len(images) >= batch_size
 
-    choice = random.sample(range(len(images)), 1)[0]
-    sample_distorted = add_dim(resize_image(random_crop_and_distort(images[choice], distort), shape))
+    choices = random.sample(range(len(images)), batch_size)
+    samples_distorted = [add_dim(resize_image(random_crop_and_distort(image), shape)) for image in
+                         np.asarray(images)[choices]]
 
-    # return samples_distorted, labels[choices]
-    yield sample_distorted, labels[choice]
-
-
-def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial)
-
-
-def bias_variable(shape):
-    initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial)
+    return samples_distorted, labels[choices]
