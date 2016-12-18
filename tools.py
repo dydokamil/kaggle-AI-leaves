@@ -136,13 +136,15 @@ def load_images(directory, ids):
     return np.asarray([np.asarray(Image.open(image)) for image in path_files])
 
 
-def random_batch_distorted(images, labels, batch_size, shape, distorted=True):
+def random_batch_distorted(images, labels, batch_size, shape, additional, distorted=True):
     '''
     This function takes the entire list of images & labels and returns a random batch of [images] and [labels] of /size/
     for training
     :param images: 3D list: the entire list of images
     :param labels: 2D list: the entire list of labels
-    :param size: how many samples to return
+    :param batch_size: how many samples to return
+    :param shape: shape of the images to return
+    :param additional: the additional information about the images
     :return: 4D list [images]: [batch_size, x, y, 1], 2D list [labels]: [sample number, label]
     '''
     assert len(images) >= batch_size
@@ -151,4 +153,4 @@ def random_batch_distorted(images, labels, batch_size, shape, distorted=True):
     samples_distorted = [add_dim(resize_image(random_crop_and_distort(image, distorted), shape)) for image in
                          np.asarray(images)[choices]]
 
-    return samples_distorted, labels[choices]
+    return np.array(samples_distorted), labels[choices], np.array(additional)[choices]

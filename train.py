@@ -12,8 +12,8 @@ from sklearn.preprocessing import OneHotEncoder
 
 from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_distorted
 
-BATCH_SIZE = 64
-NB_EPOCH = 20000
+BATCH_SIZE = 256
+NB_EPOCH = 50
 N_CLASSES = 99
 IMAGE_RESOLUTION = (224, 224)
 ADDITIONAL_FEATURES_LEN = 192
@@ -28,7 +28,7 @@ train = pd.read_csv(train_path)
 labels = train['species'].tolist()
 
 # Load all training images
-all_images = load_images(path_images, ids=train.id)[:64]
+all_images = load_images(path_images, ids=train.id)
 
 # Create a dict of 'id': additional features
 additional = train.drop('species', 1).set_index('id').T.to_dict('list')
@@ -84,8 +84,6 @@ model_final.add(Dense(N_CLASSES, activation='softmax'))
 model_final.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='sgd')
 
 for e in range(NB_EPOCH):
-    X, y = random_batch_distorted(list(all_images.values()), onehot_labels, BATCH_SIZE, IMAGE_RESOLUTION,
-                                  distorted=True)
-    X = np.array(X)
-    additional_X = np.array(list(additional.values())[:64])  # TODO: remove [:64]
-    loss = model_final.fit([X, additional_X], y, batch_size=BATCH_SIZE, nb_epoch=40)
+    X, y, Z = random_batch_distorted(list(all_images.values()), onehot_labels, BATCH_SIZE, IMAGE_RESOLUTION,
+                                     list(additional.values()),distorted=True)
+    model_final.fit([X, Z], y, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH)
