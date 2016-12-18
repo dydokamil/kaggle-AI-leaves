@@ -85,11 +85,16 @@ model_merged.add(Dropout(.5))
 model_merged.add(Dense(N_CLASSES, activation='softmax'))
 model_merged.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
 
+if True:
+    model_merged.load_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/430.h5')
+
 for e in range(ITERATIONS):
     X, y, Z = random_batch_distorted(list(all_images.values()), onehot_labels, BATCH_SIZE, IMAGE_RESOLUTION,
                                      list(additional.values()), distorted=True)
-    model_merged.fit([X, Z], y, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, validation_split=.1)
-    if e % 10 == 0:
+    valid_data = random_batch_distorted(list(all_images.values()), onehot_labels, 990, IMAGE_RESOLUTION,
+                                        list(additional.values()), distorted=False)
+    model_merged.fit([X, Z], y, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH,
+                     validation_data=([valid_data[0], valid_data[2]], valid_data[1]))
+    if e % 30 == 0:
         model_merged.save_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/'
-                                      + str(e) + '.h5')
-
+                                  + str(e) + 'v2.h5')

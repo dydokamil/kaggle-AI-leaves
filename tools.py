@@ -145,7 +145,7 @@ def random_batch_distorted(images, labels, batch_size, shape, additional, distor
     :param batch_size: how many samples to return
     :param shape: shape of the images to return
     :param additional: the additional information about the images
-    :return: 4D list [images]: [batch_size, x, y, 1], 2D list [labels]: [sample number, label]
+    :return: 4D list [images]: [batch_size, x, y, 1], 2D list [labels]: [sample number, label], 2D additional features
     '''
     assert len(images) >= batch_size
 
