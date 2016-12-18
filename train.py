@@ -1,5 +1,6 @@
 # coding=utf-8
 # This is a tensorflow/keras model to classify leaves based on images and some additional data
+from multiprocessing.pool import Pool
 
 import numpy as np
 import pandas as pd
@@ -10,10 +11,11 @@ from sklearn import preprocessing
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_distorted
+from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_distorted, add_dim
 
-BATCH_SIZE = 256
-NB_EPOCH = 50
+BATCH_SIZE = 130
+NB_EPOCH = 35
+ITERATIONS = 20000
 N_CLASSES = 99
 IMAGE_RESOLUTION = (224, 224)
 ADDITIONAL_FEATURES_LEN = 192
@@ -76,14 +78,18 @@ model.add(Dropout(.5))
 additional_info_model = Sequential()
 additional_info_model.add(Dense(192, input_shape=(192,)))
 
-model_final = Sequential()
-model_final.add(Merge([model, additional_info_model], mode='concat'))
-model_final.add(Dense(4096 + ADDITIONAL_FEATURES_LEN, activation='tanh'))
-model_final.add(Dropout(.5))
-model_final.add(Dense(N_CLASSES, activation='softmax'))
-model_final.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='sgd')
+model_merged = Sequential()
+model_merged.add(Merge([model, additional_info_model], mode='concat'))
+model_merged.add(Dense(4096 + ADDITIONAL_FEATURES_LEN, activation='tanh'))
+model_merged.add(Dropout(.5))
+model_merged.add(Dense(N_CLASSES, activation='softmax'))
+model_merged.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
 
-for e in range(NB_EPOCH):
+for e in range(ITERATIONS):
     X, y, Z = random_batch_distorted(list(all_images.values()), onehot_labels, BATCH_SIZE, IMAGE_RESOLUTION,
-                                     list(additional.values()),distorted=True)
-    model_final.fit([X, Z], y, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH)
+                                     list(additional.values()), distorted=True)
+    model_merged.fit([X, Z], y, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH, validation_split=.1)
+    if e % 10 == 0:
+        model_merged.save_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/'
+                                      + str(e) + '.h5')
+
