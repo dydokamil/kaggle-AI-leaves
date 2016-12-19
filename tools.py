@@ -4,8 +4,14 @@ import random
 
 import numpy as np
 from PIL import Image
+from keras.engine import Merge
+from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization, Flatten, Dense, Dropout
+from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
-import tensorflow as tf
+
+N_CLASSES = 99
+IMAGE_RESOLUTION = (224, 224)
+ADDITIONAL_FEATURES_LEN = 192
 
 
 def crop_to_first(image):
@@ -154,3 +160,41 @@ def random_batch_distorted(images, labels, batch_size, shape, additional, distor
                          np.asarray(images)[choices]]
 
     return np.array(samples_distorted), labels[choices], np.array(additional)[choices]
+
+
+def get_model(img_res, additional_features_len, n_classes):
+    '''
+    Creates and returns a pre-trained keras model
+    :param img_res: 2D tuple of x and y resolution
+    :param additional_features_len: length of additional features (columns)
+    :param n_classes: number of classes
+    :return: pre-trained keras model
+    '''
+    model = Sequential()
+    model.add(Convolution2D(96, 11, 11, subsample=(4, 4), activation='relu',
+                            input_shape=(img_res[0], img_res[1]) + (1,)))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), border_mode='same'))
+    model.add(BatchNormalization())
+    model.add(Convolution2D(256, 5, 5, activation='relu', border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), border_mode='same'))
+    model.add(BatchNormalization())
+    model.add(Convolution2D(384, 3, 3, activation='relu', border_mode='same'))
+    model.add(Convolution2D(384, 3, 3, activation='relu', border_mode='same'))
+    model.add(Convolution2D(256, 3, 3, activation='relu', border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), border_mode='same'))
+    model.add(BatchNormalization())
+    model.add(Flatten())
+    model.add(Dense(4096, activation='tanh'))
+    model.add(Dropout(.5))
+
+    additional_info_model = Sequential()
+    additional_info_model.add(Dense(192, input_shape=(192,)))
+
+    model_merged = Sequential()
+    model_merged.add(Merge([model, additional_info_model], mode='concat'))
+    model_merged.add(Dense(4096 + additional_features_len, activation='tanh'))
+    model_merged.add(Dropout(.5))
+    model_merged.add(Dense(n_classes, activation='softmax'))
+    model_merged.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
+
+    return model_merged
