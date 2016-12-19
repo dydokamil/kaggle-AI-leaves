@@ -8,6 +8,8 @@ from keras.engine import Merge
 from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization, Flatten, Dense, Dropout
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 N_CLASSES = 99
 IMAGE_RESOLUTION = (224, 224)
@@ -76,6 +78,18 @@ def __distort_input(img, count=1):
             return np.array(images).squeeze()
 
 
+def onehot_encode(labels):
+    label_encoder = LabelEncoder()
+    label_encoder.fit(labels)
+    labels_int = label_encoder.transform(labels)
+
+    oh_encoder = OneHotEncoder()
+    onehot_labels = oh_encoder.fit_transform([[x] for x in labels_int])
+    onehot_labels = onehot_labels.toarray()  # array of one-hot encodings for each label
+
+    return onehot_labels
+
+
 def __random_crop(image):
     '''
     Randomly selects a square from an image along shorter axis
@@ -138,8 +152,7 @@ def load_images(directory, ids):
     '''
     ids = ids.tolist()
     files = os.listdir(directory)
-    path_files = [directory + file for file in files]
-    path_files = [path for path in path_files if int(path.split('/')[-1].split('.')[0]) in ids]
+    path_files = [directory + str(id) + '.jpg' for id in ids]
     return np.asarray([np.asarray(Image.open(image)) for image in path_files])
 
 
