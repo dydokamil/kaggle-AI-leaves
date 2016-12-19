@@ -3,9 +3,6 @@
 
 import numpy as np
 import pandas as pd
-from keras.engine import Merge
-from keras.layers import Dense, Convolution2D, MaxPooling2D, BatchNormalization, Dropout, Flatten
-from keras.models import Sequential
 from sklearn import preprocessing
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
@@ -14,7 +11,7 @@ from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random
     IMAGE_RESOLUTION, ADDITIONAL_FEATURES_LEN, N_CLASSES
 
 BATCH_SIZE = 130
-VALID_SIZE = 990
+VALID_SIZE = 100
 NB_EPOCH = 35
 ITERATIONS = 20000
 
@@ -66,7 +63,14 @@ for e in range(ITERATIONS):
                                                        IMAGE_RESOLUTION, list(additional.values()), distorted=True)
     X_valid, y_valid, Z_valid = random_batch_distorted(list(all_images.values()), onehot_labels, VALID_SIZE,
                                                        IMAGE_RESOLUTION, list(additional.values()), distorted=False)
-    model.fit([X_train, Z_train], y_train, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH,
-              validation_data=([X_valid, Z_valid], y_valid))
+    model.fit([X_train, Z_train], y_train, batch_size=BATCH_SIZE, nb_epoch=NB_EPOCH)
+    loss = model.evaluate([X_valid, Z_valid], y_valid, VALID_SIZE)
+
+    # logging
+    print('validation loss, accuracy: ', loss)
+
+    with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses.txt", "a") as myfile:
+        myfile.write(str(loss))
+
     if e % 30 == 0:
-        model.save_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/' + str(e) + 'v6.h5')
+        model.save_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/' + str(e) + 'v7.h5')
