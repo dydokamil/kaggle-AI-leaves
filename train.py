@@ -8,11 +8,10 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
 from Deep_Learning.kaggle.leaves.tools import load_images, crop_to_first, random_batch_distorted, get_model, \
-    IMAGE_RESOLUTION, ADDITIONAL_FEATURES_LEN, N_CLASSES
+    IMAGE_RESOLUTION, ADDITIONAL_FEATURES_LEN, N_CLASSES, NB_EPOCH
 
 BATCH_SIZE = 130
 VALID_SIZE = 100
-NB_EPOCH = 35
 ITERATIONS = 20000
 
 path = '/home/kamil/Documents/kaggle/leaves/'

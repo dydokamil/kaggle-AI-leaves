@@ -12,6 +12,7 @@ from keras.preprocessing.image import ImageDataGenerator, img_to_array
 N_CLASSES = 99
 IMAGE_RESOLUTION = (224, 224)
 ADDITIONAL_FEATURES_LEN = 192
+NB_EPOCH = 35
 
 
 def crop_to_first(image):
