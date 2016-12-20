@@ -44,7 +44,7 @@ all_images = [min_max_scaler.fit_transform(x) for x in all_images]
 model = get_model(IMAGE_RESOLUTION, ADDITIONAL_FEATURES_LEN, N_CLASSES)
 
 if False:
-    model.load_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/540v8.h5')
+    model.load_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/10v11small.h5')
 
 for e in range(ITERATIONS):
     X_train, y_train, Z_train = random_batch_distorted(all_images, onehot_labels, BATCH_SIZE,
@@ -57,8 +57,8 @@ for e in range(ITERATIONS):
     # logging
     print('validation loss, accuracy: ', loss)
 
-    with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses3.txt", "a") as myfile:
+    with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses4.txt", "a") as myfile:
         myfile.write(str(loss))
 
-    if e % 10 == 0 and e != 0:
-        model.save_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/' + str(e) + 'v10small.h5')
+    if e % 5 == 0 and e != 0:
+        model.save_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/' + str(e) + 'v13small.h5')

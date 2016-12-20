@@ -5,7 +5,7 @@ from scipy.interpolate import spline
 
 from Deep_Learning.kaggle.leaves.tools import NB_EPOCH
 
-with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses3.txt", "r") as myfile:
+with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses4.txt", "r") as myfile:
     all_data = myfile.read()
 
 SMOOTH = False
@@ -32,6 +32,9 @@ else:
     plt.plot(x, accuracy, color='g', label='accuracy')
 
 plt.legend(loc='upper right')
-plt.show()
+plt.grid(True)
+plt.xlim(30, )
+plt.ylim(0, 2)
+plt.savefig('plot.png')
 
 pass
