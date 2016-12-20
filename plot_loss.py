@@ -33,8 +33,5 @@ else:
 
 plt.legend(loc='upper right')
 plt.grid(True)
-plt.xlim(30, )
 plt.ylim(0, 2)
 plt.savefig('plot.png')
-
-pass
