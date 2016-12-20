@@ -10,6 +10,7 @@ from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
+import pickle
 
 N_CLASSES = 99
 IMAGE_RESOLUTION = (224, 224)
@@ -87,7 +88,20 @@ def onehot_encode(labels):
     onehot_labels = oh_encoder.fit_transform([[x] for x in labels_int])
     onehot_labels = onehot_labels.toarray()  # array of one-hot encodings for each label
 
+    pickle.dump(label_encoder, open("label_encoder.pickle", "wb"))
+    pickle.dump(oh_encoder, open("oh_encoder.pickle", "wb"))
+
     return onehot_labels
+
+
+def get_encoders():
+    try:
+        label_encoder = pickle.load(open("label_encoder.pickle", "wb"))
+        oh_encoder = pickle.load(open("oh_encoder.pickle", "wb"))
+    except:
+        return Exception('Missing encoder files, run ohehot_encode first.')
+
+    return label_encoder, oh_encoder
 
 
 def __random_crop(image):
@@ -174,6 +188,26 @@ def random_batch_distorted(images, labels, batch_size, shape, additional, distor
                          np.asarray(images)[choices]]
 
     return np.array(samples_distorted), labels[choices], np.array(additional)[choices]
+
+
+def random_batch_testing(image, num_images, shape, additional):
+    '''
+    This function returns a batch of /num_images/ crops of each image for testing
+    :param image: the sample to crop
+    :param num_images: number of images to return per sample
+    :param shape: shape of each image
+    :param additional: additional information from the file
+    :return: batch of shape [images per sample, x, y, 1], additional information
+    '''
+
+    img_arr = []
+    additional_arr = []
+
+    for i in range(num_images):
+        img_arr.append(add_dim(resize_image(random_crop_and_distort(image, distort=False), shape)))
+        additional_arr.append(additional)
+
+    return np.array(img_arr), np.array(additional_arr)
 
 
 def get_model(img_res, additional_features_len, n_classes):
