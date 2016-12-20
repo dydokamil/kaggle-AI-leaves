@@ -15,10 +15,10 @@ POOL_SIZE = 31  # number of crops
 path = '/home/kamil/Documents/kaggle/leaves/'
 path_images = '/home/kamil/Documents/kaggle/leaves/images/'
 test_path = path + 'test.csv'
-submission_path = path + 'submission.csv'
+submission_path = path + 'submission4.csv'
 sample_submission_path = path + 'sample_submission.csv'
 # Choose the model version
-model_weights_path = '/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/360v8.h5'
+model_weights_path = '/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/20v13small.h5'
 
 # Load all labels
 test = pd.read_csv(test_path)

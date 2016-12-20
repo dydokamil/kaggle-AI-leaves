@@ -27,9 +27,6 @@ all_images = load_images(path_images, ids=train.id)
 additional = train.drop('species', 1).set_index('id').T.to_dict('list')
 additional = list(additional.values())
 
-# Create a dict of 'id': species
-train_ids_species = train[['id', 'species']].set_index('id').T.to_dict('records')[0]
-
 # Encode labels
 onehot_labels = onehot_encode(labels)
 

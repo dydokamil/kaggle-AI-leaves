@@ -10,6 +10,7 @@ from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization, Flatte
 from keras.models import Sequential
 from keras.optimizers import SGD, Adam
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
+from keras.utils.visualize_util import plot
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 import pickle
@@ -245,5 +246,10 @@ def get_model(img_res, additional_features_len, n_classes):
     model_merged.add(Dense(n_classes, activation='softmax'))
     optimizer = Adam(decay=1e-6)
     model_merged.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer=optimizer)
+
+    # Plot the model to files
+    plot(model, to_file='./model_left.png', show_shapes=True)
+    plot(additional_info_model, to_file='./model_right.png', show_shapes=True)
+    plot(model_merged, to_file='./model_merged.png', show_shapes=True)
 
     return model_merged
