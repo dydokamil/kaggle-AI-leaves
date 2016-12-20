@@ -3,6 +3,7 @@ import os
 import random
 
 import numpy as np
+import sys
 from PIL import Image
 from keras.engine import Merge
 from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization, Flatten, Dense, Dropout
@@ -13,7 +14,7 @@ from sklearn.preprocessing import OneHotEncoder
 import pickle
 
 N_CLASSES = 99
-IMAGE_RESOLUTION = (224, 224)
+IMAGE_RESOLUTION = (150, 150)
 ADDITIONAL_FEATURES_LEN = 192
 NB_EPOCH = 35
 
@@ -96,10 +97,11 @@ def onehot_encode(labels):
 
 def get_encoders():
     try:
-        label_encoder = pickle.load(open("label_encoder.pickle", "wb"))
-        oh_encoder = pickle.load(open("oh_encoder.pickle", "wb"))
-    except:
-        return Exception('Missing encoder files, run ohehot_encode first.')
+        label_encoder = pickle.load(open("label_encoder.pickle", "rb"))
+        oh_encoder = pickle.load(open("oh_encoder.pickle", "rb"))
+    except FileNotFoundError as e:
+        print('Files not found. Run onehot_encode() from train.py first')
+        sys.exit()
 
     return label_encoder, oh_encoder
 
@@ -219,20 +221,17 @@ def get_model(img_res, additional_features_len, n_classes):
     :return: pre-trained keras model
     '''
     model = Sequential()
-    model.add(Convolution2D(96, 11, 11, subsample=(4, 4), activation='relu',
+    model.add(Convolution2D(64, 8, 8, subsample=(3, 3), activation='relu',
                             input_shape=(img_res[0], img_res[1]) + (1,)))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), border_mode='same'))
-    model.add(BatchNormalization())
-    model.add(Convolution2D(256, 5, 5, activation='relu', border_mode='same'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), border_mode='same'))
-    model.add(BatchNormalization())
-    model.add(Convolution2D(384, 3, 3, activation='relu', border_mode='same'))
-    model.add(Convolution2D(384, 3, 3, activation='relu', border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), border_mode='same'))
+    model.add(Convolution2D(128, 4, 4, activation='relu', border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), border_mode='same'))
     model.add(Convolution2D(256, 3, 3, activation='relu', border_mode='same'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), border_mode='same'))
-    model.add(BatchNormalization())
+    model.add(Convolution2D(256, 3, 3, activation='relu', border_mode='same'))
+    model.add(Convolution2D(128, 3, 3, activation='relu', border_mode='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), border_mode='same'))
     model.add(Flatten())
-    model.add(Dense(4096, activation='tanh'))
+    model.add(Dense(1024, activation='tanh'))
     model.add(Dropout(.5))
 
     additional_info_model = Sequential()
@@ -240,7 +239,7 @@ def get_model(img_res, additional_features_len, n_classes):
 
     model_merged = Sequential()
     model_merged.add(Merge([model, additional_info_model], mode='concat'))
-    model_merged.add(Dense(4096 + additional_features_len, activation='tanh'))
+    model_merged.add(Dense(1024 + additional_features_len, activation='tanh'))
     model_merged.add(Dropout(.5))
     model_merged.add(Dense(n_classes, activation='softmax'))
     model_merged.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')

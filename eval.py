@@ -33,7 +33,7 @@ additional = train.drop('species', 1).set_index('id').T.to_dict('list')
 
 model = get_model(IMAGE_RESOLUTION, ADDITIONAL_FEATURES_LEN, N_CLASSES)
 
-model.load_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/120v4.h5')
+model.load_weights('/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/600v7.h5')
 
 X, y, Z = random_batch_distorted(all_images, onehot_labels, 990, IMAGE_RESOLUTION,
                                  list(additional.values()), distorted=False)

@@ -5,7 +5,7 @@ from scipy.interpolate import spline
 
 from Deep_Learning.kaggle.leaves.tools import NB_EPOCH
 
-with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses.txt", "r") as myfile:
+with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses2.txt", "r") as myfile:
     all_data = myfile.read()
 
 all_data_list = all_data.split('][')
