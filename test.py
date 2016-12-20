@@ -10,7 +10,7 @@ from collections import Counter
 from Deep_Learning.kaggle.leaves.tools import load_images, onehot_encode, crop_to_first, IMAGE_RESOLUTION, \
     ADDITIONAL_FEATURES_LEN, N_CLASSES, get_model, random_batch_distorted, random_batch_testing, get_encoders
 
-POOL_SIZE = 21  # number of crops
+POOL_SIZE = 31  # number of crops
 
 path = '/home/kamil/Documents/kaggle/leaves/'
 path_images = '/home/kamil/Documents/kaggle/leaves/images/'
@@ -56,3 +56,12 @@ for i in range(len(all_images)):
     prediction = sum(prediction) / POOL_SIZE
     predictions.append(prediction)
 
+predictions = np.array(predictions)
+ids = np.array([[x] for x in ids])
+
+sample_submission_df = pd.read_csv(sample_submission_path)
+column_names = list(sample_submission_df.columns.values)[1:]
+ids = sample_submission_df.iloc[:, 0]
+
+submission_df = pd.DataFrame(data=predictions, columns=column_names, index=ids)
+submission_df.to_csv(submission_path, float_format='%.16f')
