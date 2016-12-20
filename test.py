@@ -15,6 +15,8 @@ POOL_SIZE = 21  # number of crops
 path = '/home/kamil/Documents/kaggle/leaves/'
 path_images = '/home/kamil/Documents/kaggle/leaves/images/'
 test_path = path + 'test.csv'
+submission_path = path + 'submission.csv'
+sample_submission_path = path + 'sample_submission.csv'
 # Choose the model version
 model_weights_path = '/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/540v8.h5'
 
@@ -23,6 +25,8 @@ test = pd.read_csv(test_path)
 
 # Load all training images
 all_images = load_images(path_images, ids=test.id)
+
+ids = test.id.tolist()
 
 # Get the batch size
 batch_size = len(all_images)
@@ -44,8 +48,11 @@ label_encoder, oh_encoder = get_encoders()
 model = get_model(IMAGE_RESOLUTION, ADDITIONAL_FEATURES_LEN, N_CLASSES)
 model.load_weights(model_weights_path)
 
+predictions = []
+
 for i in range(len(all_images)):
     X_test, Z_test = random_batch_testing(all_images[i], POOL_SIZE, IMAGE_RESOLUTION, additional[i])
-    prediction = model.predict_classes([X_test, Z_test])
-    predicted_class = Counter(prediction).most_common(1)[0][0]
-    predicted_class_name = label_encoder.classes_[predicted_class]
+    prediction = model.predict_proba([X_test, Z_test])
+    prediction = sum(prediction) / POOL_SIZE
+    predictions.append(prediction)
+
