@@ -5,3 +5,9 @@
 <img src="https://raw.githubusercontent.com/dydokamil/kaggle-AI-leaves/master/plot.png" width=50%>
 <p>Best submission:</p>
 <img src="https://raw.githubusercontent.com/dydokamil/kaggle-AI-leaves/master/submission.png">
+# Convolution layers
+<img src="https://raw.githubusercontent.com/dydokamil/kaggle-AI-leaves/master/model_left.png">
+# Additional info layer
+<img src="https://raw.githubusercontent.com/dydokamil/kaggle-AI-leaves/master/model_right.png">
+# Both branches merged
+<img src="https://raw.githubusercontent.com/dydokamil/kaggle-AI-leaves/master/model_merged.png">
