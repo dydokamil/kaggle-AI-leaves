@@ -223,17 +223,16 @@ def get_model(img_res, additional_features_len, n_classes):
     :return: pre-trained keras model
     '''
     model = Sequential()
-    model.add(Convolution2D(64, 8, 8, subsample=(3, 3), activation='relu',
-                            input_shape=(img_res[0], img_res[1]) + (1,)))
+    model.add(Convolution2D(64, 3, 3, activation='relu', input_shape=(img_res[0], img_res[1]) + (1,)))
     model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), border_mode='same'))
-    model.add(Convolution2D(128, 4, 4, activation='relu', border_mode='same'))
+    model.add(Convolution2D(128, 3, 3, activation='relu', border_mode='same'))
     model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), border_mode='same'))
     model.add(Convolution2D(256, 3, 3, activation='relu', border_mode='same'))
     model.add(Convolution2D(256, 3, 3, activation='relu', border_mode='same'))
     model.add(Convolution2D(128, 3, 3, activation='relu', border_mode='same'))
     model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), border_mode='same'))
     model.add(Flatten())
-    model.add(Dense(1024, activation='tanh'))
+    model.add(Dense(1024, activation='relu'))
     model.add(Dropout(.5))
 
     additional_info_model = Sequential()
@@ -241,10 +240,10 @@ def get_model(img_res, additional_features_len, n_classes):
 
     model_merged = Sequential()
     model_merged.add(Merge([model, additional_info_model], mode='concat'))
-    model_merged.add(Dense(1024 + additional_features_len, activation='tanh'))
+    model_merged.add(Dense(1024 + additional_features_len, activation='relu'))
     model_merged.add(Dropout(.5))
     model_merged.add(Dense(n_classes, activation='softmax'))
-    optimizer = Adam(decay=1e-6)
+    optimizer = Adam(decay=1e-4)
     model_merged.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer=optimizer)
 
     # Plot the model to files

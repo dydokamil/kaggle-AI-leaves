@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import spline
 
-from Deep_Learning.kaggle.leaves.tools import NB_EPOCH
+from tools import NB_EPOCH
 
-with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses4.txt", "r") as myfile:
+with open("/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/losses5.txt", "r") as myfile:
     all_data = myfile.read()
 
-SMOOTH = False
+SMOOTH = True
 
 all_data_list = all_data.split('][')
 all_data_list = [loss_acc.split(',') for loss_acc in all_data_list]

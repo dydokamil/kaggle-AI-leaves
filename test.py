@@ -2,23 +2,20 @@
 
 import pandas as pd
 from sklearn import preprocessing
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import OneHotEncoder
 import numpy as np
-from collections import Counter
 
-from Deep_Learning.kaggle.leaves.tools import load_images, onehot_encode, crop_to_first, IMAGE_RESOLUTION, \
-    ADDITIONAL_FEATURES_LEN, N_CLASSES, get_model, random_batch_distorted, random_batch_testing, get_encoders
+from tools import load_images, crop_to_first, get_encoders, IMAGE_RESOLUTION, ADDITIONAL_FEATURES_LEN, N_CLASSES, \
+    get_model, random_batch_testing
 
 POOL_SIZE = 31  # number of crops
 
 path = '/home/kamil/Documents/kaggle/leaves/'
 path_images = '/home/kamil/Documents/kaggle/leaves/images/'
 test_path = path + 'test.csv'
-submission_path = path + 'submission4.csv'
+submission_path = path + 'submission5.csv'
 sample_submission_path = path + 'sample_submission.csv'
 # Choose the model version
-model_weights_path = '/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/20v13small.h5'
+model_weights_path = '/media/kamil/c0a6bdfe-d860-4f81-8a6f-1f1d714ac49f/keras/leaves/195v14small.h5'
 
 # Load all labels
 test = pd.read_csv(test_path)
